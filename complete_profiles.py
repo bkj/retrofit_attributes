@@ -1,10 +1,19 @@
-from collections import Counter, defaultdict
-from copy import deepcopy
+#!/usr/bin/env python
+
+"""
+    complete_profiles.py
+"""
+
+import sys
 import argparse
 import numpy as np
-import sys
 import pandas as pd
+from copy import deepcopy
+
+from collections import Counter, defaultdict
+
 from gensim.models import Doc2Vec
+
 from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.feature_selection import SelectKBest, chi2
@@ -13,17 +22,17 @@ from sklearn.metrics import f1_score
 from sklearn.preprocessing import LabelEncoder
 from scipy.sparse import csr_matrix
 
-parser = argparse.ArgumentParser(description="complete demographic profles in a sample based on their embeddings")
-parser.add_argument('--target', help='demographic variable to predict', choices={'age', 'gender'}, type=str, required=True)
-parser.add_argument('--model', help='Doc2Vec model', type=str, required=True)
-parser.add_argument('--data', help='input data with target variables', type=str, required=True)
-parser.add_argument('--limit', help='limit instances for test purposes', default=None, type=int)
-parser.add_argument('--runs', help='number of runs to average over', default=10, type=int)
-parser.add_argument('--alpha', help='weight of original vector (0-1.0). Default 0.5. alpha=1 is the same as no retrofitting', default=0.5, type=float)
-parser.add_argument('--size', help='number of assumed known profiles', default=None, type=int, required=True)
-parser.add_argument('--prefix', help='output prefix', type=str, required=True)
-
-args = parser.parse_args()
+def parse_args():
+    parser = argparse.ArgumentParser(description="complete demographic profles in a sample based on their embeddings")
+    parser.add_argument('--target', help='demographic variable to predict', choices={'age', 'gender'}, type=str, required=True)
+    parser.add_argument('--model', help='Doc2Vec model', type=str, required=True)
+    parser.add_argument('--data', help='input data with target variables', type=str, required=True)
+    parser.add_argument('--limit', help='limit instances for test purposes', default=None, type=int)
+    parser.add_argument('--runs', help='number of runs to average over', default=10, type=int)
+    parser.add_argument('--alpha', help='weight of original vector (0-1.0). Default 0.5. alpha=1 is the same as no retrofitting', default=0.5, type=float)
+    parser.add_argument('--size', help='number of assumed known profiles', default=None, type=int, required=True)
+    parser.add_argument('--prefix', help='output prefix', type=str, required=True)
+    return parser.parse_args()
 
 
 def retrofit(vectors, neighbors, normalize=False, num_iters=10, alpha=0.5):
